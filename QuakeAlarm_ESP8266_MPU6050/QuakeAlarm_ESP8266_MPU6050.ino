@@ -155,8 +155,7 @@ void loop() {
   // Get the difference with the previous value
   difference = Sensor.getDiffAverage();
 
-  Serial.println(difference);
-
+  
   /*  Testing values
   Serial.print("VAxis:"); Serial.print(Sensor.getVAxis());
   Serial.print(", MinAccel:"); Serial.print(Sensor.getMinAcc());
