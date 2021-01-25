@@ -19,7 +19,7 @@
 #define PASSWORD "your-wifi-password" // Put here your Wi-Fi
 
 // QuakeAlarm Configuration
-#define ID "your-ID" // This ID is unique for each device, ask for one to contact@iot.cl
+#define ID "ff21e0eaba401d343b3f3edb325ad7af" // This ID is unique for each device, ask for one to contact@iot.cl
 #define SERVER "dcs.iot.cl" // This is the iot.cl server
 
 // QuakeAlarm internal variables
@@ -69,7 +69,7 @@ void httpRequest(char action[200]) {
       Serial.println("[HTTP] Start a ping request");
     }
     else {
-      sprintf(url, "http://%s/sensor.php?id=%s&sensor=quakealarm&valor=%d&diferencia=%d", SERVER, ID, qaValue, difference);
+      sprintf(url, "http://%s/sensor.php?id=%s&sensor=quakealarm&valor=%d&diferencia=%.2f", SERVER, ID, qaValue, difference);
       lastConnection = millis();
       Serial.println("[HTTP] Start a activation request");
     }
@@ -154,6 +154,8 @@ void loop() {
 
   // Get the difference with the previous value
   difference = Sensor.getDiffAverage();
+
+  Serial.println(difference);
 
   /*  Testing values
   Serial.print("VAxis:"); Serial.print(Sensor.getVAxis());
