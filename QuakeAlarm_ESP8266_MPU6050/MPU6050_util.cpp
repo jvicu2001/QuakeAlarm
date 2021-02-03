@@ -10,22 +10,33 @@ int16_t MPU6050::getRawAcY() {
 int16_t MPU6050::getRawAcZ() {
   return this->AcZ;
 }
+int MPU6050::getVAxis() {
+  return this->VAxis;
+}
 /*int16_t MPU6050::getRawTmp() { return this->Tmp; }
   int16_t MPU6050::getRawGyX() { return this->GyX; }
   int16_t MPU6050::getRawGyY() { return this->GyY; }
   int16_t MPU6050::getRawGyZ() { return this->GyZ; }*/
-int16_t MPU6050::getCurrentAcc() {
+long MPU6050::getCurrentAcc() {
   return this->currAcc;
 }
 /*int16_t MPU6050::getMinAcc() { return(this->minAcc); }
   int16_t MPU6050::getMaxAcc() { return(this->maxAcc); }*/
-int16_t MPU6050::getAccDiff() {
+long MPU6050::getAccDiff() {
   return (this->currAcc - this->lastAcc);
 }
 /*int16_t MPU6050::getMinDiff() { return(this->minDiff); }
   int16_t MPU6050::getMaxDiff() { return(this->maxDiff); }*/
 float MPU6050::getDiffAverage() {
   return this->diff_buffer->average();
+}
+
+long MPU6050::getBiggestDiff() {
+  return this->value_buffer->biggestDifference();
+}
+
+long MPU6050::getImmediateDiff() {
+  return abs(this->currAcc - this->lastAcc);
 }
 
 //  Read Accelerometer, Gyroscope and Temperature data from the MPU6050's registers
@@ -47,6 +58,7 @@ void MPU6050::readData() {
   this->lastAcc = this->currAcc;
   this->currAcc = this->getAxisSum();
   this->diff_buffer->append(abs(this->currAcc - this->lastAcc));
+  this->value_buffer->append(this->currAcc);
 }
 
 //  Setting up procesed data, for analysis, most aren't needed
@@ -54,28 +66,30 @@ void MPU6050::setDefaultParameters() {
   delay(50);    // Let initial readings normalize themselves before taking data
 
   //  Figuring out the Vertical Axis
-  while ((this->AcX == this->AcY) and (this->AcX == this->AcZ)) {
-    this->readData();
-    delay(0);
-    if ((this->AcX != this->AcY) and (this->AcX != this->AcZ)) {
-      if (abs(this->AcX) > abs(this->AcY)) {
-        if (abs(this->AcX) > abs(this->AcZ)) {
-          this->VAxis = 0;
+  if (!ALL_AXIS){
+    while ((this->AcX == this->AcY) and (this->AcX == this->AcZ)) {
+      this->readData();
+      delay(0);
+      if ((this->AcX != this->AcY) and (this->AcX != this->AcZ)) {
+        if (abs(this->AcX) > abs(this->AcY)) {
+          if (abs(this->AcX) > abs(this->AcZ)) {
+            this->VAxis = 0;
+          }
+          else {
+            this->VAxis = 2;
+          }
         }
         else {
-          this->VAxis = 2;
-        }
-      }
-      else {
-        if (abs(this->AcY) > abs(this->AcZ)) {
-          this->VAxis = 1;
-        }
-        else {
-          this->VAxis = 2;
+          if (abs(this->AcY) > abs(this->AcZ)) {
+            this->VAxis = 1;
+          }
+          else {
+            this->VAxis = 2;
+          }
         }
       }
     }
-  }
+  } else { this->VAxis = -1; }
   /*
     //  Getting normal data bounds, can be useful for the NodeMCU to determine thresholds by itself.
     int16_t axisSum = this->getAxisSum();
@@ -103,8 +117,8 @@ void MPU6050::setDefaultParameters() {
   */
 }
 
-//  Adding up the two horizontal planes, simplifying processing data.
-int16_t MPU6050::getAxisSum() {
+//  Adding up the two horizontal or all three planes, simplifying processing data.
+long MPU6050::getAxisSum() {
   switch (this->VAxis) {
     case 0:
       return (this->AcY + this->AcZ);
@@ -114,6 +128,9 @@ int16_t MPU6050::getAxisSum() {
       break;
     case 2:
       return (this->AcX + this->AcY);
+      break;
+    default:
+      return (this->AcX + this->AcY + this->AcZ);
       break;
   }
 }
@@ -193,8 +210,10 @@ MPU6050::MPU6050(bool I2C_Alt_Addr) {
   }
 
   this->diff_buffer = new CyclicList(20); // Creates CyclicList used for value difference buffer
+  this->value_buffer = new CyclicList(20); // Creates CyclicList used for mixed axis value buffer
 }
 
 MPU6050::~MPU6050() {
   delete this->diff_buffer;
+  delete this->value_buffer;
 }

@@ -15,8 +15,8 @@
 
 
 // Network Configuration
-#define WIFISSID "your-wifi-ssid" // Put here your Wi-Fi SSID
-#define PASSWORD "your-wifi-password" // Put here your Wi-Fi
+#define WIFISSID "Vicuna APX" // Put here your Wi-Fi SSID
+#define PASSWORD "pad37crash" // Put here your Wi-Fi
 
 // QuakeAlarm Configuration
 #define ID "ff21e0eaba401d343b3f3edb325ad7af" // This ID is unique for each device, ask for one to contact@iot.cl
@@ -124,6 +124,7 @@ MPU6050 Sensor(false);       /* Parameter indicates if AD0 pin is connected to V
                               */
 
 void setup() {
+  pinMode(D5, OUTPUT);
   Wire.begin();
   Serial.begin(115200);
   // Serial.setDebugOutput(true);
@@ -156,16 +157,20 @@ void loop() {
   difference = Sensor.getDiffAverage();
 
   
-  /*  Testing values
+  /*  Testing values 
   Serial.print("VAxis:"); Serial.print(Sensor.getVAxis());
   Serial.print(", MinAccel:"); Serial.print(Sensor.getMinAcc());
   Serial.print(", MaxAccel:"); Serial.print(Sensor.getMaxAcc());
   Serial.print(", Diff:"); Serial.print(abs(Sensor.getAccDiff()));
-  Serial.print(", AvgDiff:"); Serial.print(Sensor.getDiffAverage());
+  Serial.print(", 20SampleMaxDiff:"); Serial.print(Sensor.getBiggestDiff());
+  Serial.print(", Diff:"); Serial.print(Sensor.getImmediateDiff());
+  Serial.print(", 20SampleDiffAverage:"); Serial.println(difference);
+  Serial.print(", Value:"); Serial.println(Sensor.getCurrentAcc());
+  Serial.print(", millis:"); Serial.println(millis());
   Serial.print(", MinDiff:"); Serial.print(Sensor.getMinDiff());
   Serial.print(", MaxDiff:"); Serial.print(Sensor.getMaxDiff());
   Serial.print(", AccelSUM:"); Serial.println(Sensor.getCurrentAcc());*/
-
+  
   // Send an activation request to the server
   if ((difference > 0) and (difference >= sensibility) and ((millis() - lastConnection) > timeInterval)) {
     httpRequest("activation");

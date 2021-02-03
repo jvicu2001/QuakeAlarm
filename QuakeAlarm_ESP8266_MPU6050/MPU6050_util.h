@@ -18,6 +18,8 @@
 #define GYRO_CONFIG 0x1B
 #define ACCEL_CONFIG 0x1C
 
+#define ALL_AXIS true  // If true, all axis get sumed. If false, only the horizontal axis get sumed.
+
 class CyclicList {
   public:
     CyclicList(int buff_size);
@@ -25,6 +27,7 @@ class CyclicList {
     void append(int value);
     int nextIdx(int idx);
     float average();
+    int biggestDifference();
   private:
     int16_t * list;
     int insertion_point;
@@ -37,6 +40,7 @@ class MPU6050 {
     void activate(unsigned int filter_level);
     MPU6050(bool I2C_Alt_Addr);
     ~MPU6050();
+    int getVAxis();
     int16_t getRawAcX();
     int16_t getRawAcY();
     int16_t getRawAcZ();
@@ -46,21 +50,25 @@ class MPU6050 {
     int16_t getRawGyZ();
     int16_t getMinAcc();
     int16_t getMaxAcc();*/
-    int16_t getCurrentAcc();
-    int16_t getAccDiff();
+    long getCurrentAcc();
+    long getAccDiff();
     /*int16_t getMinDiff();
     int16_t getMaxDiff();*/
-    int16_t getAxisSum();
+    long getAxisSum();
+    long getBiggestDiff();
+    long getImmediateDiff();
     float getDiffAverage();
     
   private:
     void setDefaultParameters();
     //  int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ,minAcc,maxAcc,minDiff,maxDiff,lastAcc,currAcc;
-    int16_t AcX,AcY,AcZ,lastAcc,currAcc;
+    int16_t AcX,AcY,AcZ;
+    long lastAcc,currAcc;
     
     int VAxis;
     int I2C_Addr;
     CyclicList * diff_buffer;
+    CyclicList * value_buffer;
 };
 
 #endif
