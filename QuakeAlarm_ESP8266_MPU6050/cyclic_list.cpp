@@ -27,3 +27,15 @@ float CyclicList::average() {
   }
   return ((float)average/(float)list_size);
 }
+
+int CyclicList::biggestDifference() {
+  int minimum = this->list[0];
+  int maximum = this->list[0];
+  int curr_value;
+  for (int i=0; i<this->list_size; i++) {
+    curr_value = this->list[i];
+    if (curr_value < minimum) { minimum = curr_value; }
+    if (curr_value > maximum) { maximum = curr_value; }
+  }
+  return (maximum - minimum);
+}
